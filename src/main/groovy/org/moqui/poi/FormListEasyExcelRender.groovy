@@ -142,7 +142,9 @@ class FormListEasyExcelRender {
             } else {
                 if (cellDataList.isEmpty() == false) {
                     CellData data = cellDataList.first()
-                    cell.setCellStyle(styleMap.get(((FormListData)data.getData()).style))
+                    if (data.type != CellDataTypeEnum.EMPTY) {
+                        cell.setCellStyle(styleMap.get(((FormListData)data.getData()).style))
+                    }
                 }
             }
         }
@@ -274,6 +276,8 @@ class FormListEasyExcelRender {
                                 }
                             } else if (curValue != null) {
                                 rowData.add(new FormListData(curValue.toString(), CellType.STRING, StyleKey.Default))
+                            } else {
+                                rowData.add(null)
                             }
 
                         } else {
@@ -327,10 +331,12 @@ class FormListEasyExcelRender {
             CellData convertToExcelData(Object value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
                 FormListData origData = value as FormListData
                 CellData cellData
-                if(origData.type == CellType.STRING) {
+                if (origData == null) {
+                    cellData = CellData.newEmptyInstance()
+                } else if(origData.type == CellType.STRING) {
                     cellData = new CellData((String) origData.value)
                 } else if (origData.type == CellType.NUMERIC) {
-                    cellData = new CellData((double) origData.value)
+                    cellData = new CellData((BigDecimal) origData.value)
                 } else {
                     throw new RuntimeException("unsupported cell type")
                 }
@@ -394,6 +400,9 @@ class FormListEasyExcelRender {
                     value = eci.resourceFacade.expand(textAttr, null, textMap)
                 } else {
                     value = eci.resourceFacade.expand(textAttr, null)
+                }
+                if (value == "null") {
+                    value = null
                 }
             } else {
                 value = eci.contextStack.getByString(fieldName)
