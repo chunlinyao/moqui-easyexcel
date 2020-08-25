@@ -103,6 +103,8 @@ class ScreenWidgetRenderEasyExcel implements ScreenWidgetRender {
             } else if ("container-row".equals(nodeName)) {
                 MNode rowCol = childNode.first("row-col")
                 if (rowCol != null) renderSubNodes(rowCol, sri, excelWriter)
+            } else if ("container".equals(nodeName)) {
+                renderSubNodes(childNode, sri, excelWriter)
             }
             // NOTE: other elements ignored, including section-iterate (outside intended use case for Excel render
         }
