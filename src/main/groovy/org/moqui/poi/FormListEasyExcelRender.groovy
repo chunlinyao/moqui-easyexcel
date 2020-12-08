@@ -100,7 +100,7 @@ class FormListEasyExcelRender {
     }
 
     enum StyleKey {
-        Default, DateTime, Date, Time, Number, NumberRight, Currency
+        Default, DateTime, Date, Time, Number, Right, YearMonth, NumberRight, Currency
 
     }
 
@@ -123,6 +123,8 @@ class FormListEasyExcelRender {
             CellStyle rowDateStyle = makeRowDateStyle(workbook)
             CellStyle rowTimeStyle = makeRowTimeStyle(workbook)
             CellStyle rowNumberStyle = makeRowNumberStyle(workbook)
+            CellStyle rowRightStyle = makeRowRightStyle(workbook)
+            CellStyle rowYearMonthStyle = makeRowYearMonthStyle(workbook)
             CellStyle rowNumberRightStyle = makeRowNumberRightStyle(workbook)
             CellStyle rowCurrencyStyle = makeRowCurrencyStyle(workbook)
             this.styleMap = new EnumMap(StyleKey);
@@ -133,6 +135,8 @@ class FormListEasyExcelRender {
             styleMap.put(StyleKey.Number, rowNumberStyle)
             styleMap.put(StyleKey.NumberRight, rowNumberRightStyle)
             styleMap.put(StyleKey.Currency, rowCurrencyStyle)
+            styleMap.put(StyleKey.Right, rowRightStyle)
+            styleMap.put(StyleKey.YearMonth, rowYearMonthStyle)
         }
 
         @Override
@@ -258,16 +262,21 @@ class FormListEasyExcelRender {
                                     data.setStyle(StyleKey.Currency)
                                 } else if (widgetFormat != null && widgetFormat.contains(".00")) {
                                     data.setStyle(StyleKey.Currency)
-                                } else if ("right".equals(fieldAlign)) {
-                                    data.setStyle(StyleKey.NumberRight)
                                 } else {
-                                    data.setStyle(StyleKey.Number)
+                                    if ("right".equals(fieldAlign)) {
+                                        if (widgetFormat !=null) {
+                                            data.setStyle(StyleKey.NumberRight)
+                                        } else {
+                                            data.setStyle(StyleKey.Right)
+                                        }
+                                    }
                                 }
                             } else if (curValue instanceof Date) {
-                                def data = new FormListData(curValue, CellType.STRING, StyleKey.Default)
+                                def data = new FormListData(DateUtil.getExcelDate(curValue), CellType.NUMERIC, StyleKey.Default)
                                 rowData.add(data)
-
-                                if (curValue instanceof java.sql.Date) {
+                                if (widgetFormat != null && (widgetFormat in ['yyyy/MM', 'yyyy-MM', 'yyyy.MM'])) {
+                                    data.setStyle(StyleKey.YearMonth)
+                                } else if (curValue instanceof java.sql.Date) {
                                     data.setStyle(StyleKey.Date)
                                 } else if (curValue instanceof java.sql.Time) {
                                     data.setStyle(StyleKey.Time)
@@ -457,6 +466,17 @@ class FormListEasyExcelRender {
         return style
     }
 
+    CellStyle makeRowYearMonthStyle(Workbook wb) {
+        DataFormat df = wb.createDataFormat()
+        Font rowFont = wb.createFont()
+
+        CellStyle style = createNoBorderStyle(wb)
+        style.setAlignment(HorizontalAlignment.LEFT)
+        style.setFont(rowFont)
+        style.setDataFormat(df.getFormat(DateFormatConverter.convert(Locale.US, "yyyy/MM")))
+
+        return style
+    }
     CellStyle makeRowDateTimeStyle(Workbook wb) {
         DataFormat df = wb.createDataFormat()
         Font rowFont = wb.createFont()
@@ -500,11 +520,20 @@ class FormListEasyExcelRender {
         CellStyle style = createNoBorderStyle(wb)
         style.setAlignment(HorizontalAlignment.CENTER)
         style.setFont(rowFont)
-        style.setDataFormat(df.getFormat("#,##0.######"))
+        style.setDataFormat(df.getFormat("#,##0.0######"))
 
         return style
     }
 
+    CellStyle makeRowRightStyle(Workbook wb) {
+        Font rowFont = wb.createFont()
+
+        CellStyle style = createNoBorderStyle(wb)
+        style.setAlignment(HorizontalAlignment.RIGHT)
+        style.setFont(rowFont)
+
+        return style
+    }
     CellStyle makeRowNumberRightStyle(Workbook wb) {
         DataFormat df = wb.createDataFormat()
         Font rowFont = wb.createFont()
@@ -512,7 +541,7 @@ class FormListEasyExcelRender {
         CellStyle style = createNoBorderStyle(wb)
         style.setAlignment(HorizontalAlignment.RIGHT)
         style.setFont(rowFont)
-        style.setDataFormat(df.getFormat("#,##0.######"))
+        style.setDataFormat(df.getFormat("#,##0.0#####"))
 
         return style
     }
