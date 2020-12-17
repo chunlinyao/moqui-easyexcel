@@ -30,6 +30,7 @@ import com.alibaba.excel.write.metadata.holder.WriteTableHolder
 import com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder
 import com.alibaba.excel.write.style.AbstractCellStyleStrategy
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.DateFormatConverter
@@ -318,9 +319,25 @@ class FormListEasyExcelRender {
             }
         }
 
+        WriteTable writeTable = createWriteTable(headerTitleList, listData)
+
+        excelWriter.write(listData, sheet, writeTable)
+
+        // TODO? something special for footer row
+
+        // auto size columns
+//        for (int c = 0; c < sheetColCount; c++) sheet.autoSizeColumn(c)
+    }
+
+    private WriteTable createWriteTable(List<String> headerTitleList, List<List<FormListData>> listData) {
         WriteTable writeTable = EasyExcel.writerTable(0).head(headerTitleList.collect({ [it] }))
-                .registerWriteHandler( new StyleStrategy(listData.size()) )
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).registerConverter(new Converter() {
+                .registerWriteHandler(new StyleStrategy(listData.size()))
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).registerConverter(newConverter()).build()
+        return writeTable
+    }
+
+    private Converter newConverter() {
+        new Converter() {
             @Override
             Class supportJavaTypeKey() {
                 return FormListData.class
@@ -342,7 +359,7 @@ class FormListEasyExcelRender {
                 CellData cellData
                 if (origData == null) {
                     cellData = CellData.newEmptyInstance()
-                } else if(origData.type == CellType.STRING) {
+                } else if (origData.type == CellType.STRING) {
                     cellData = new CellData((String) origData.value)
                 } else if (origData.type == CellType.NUMERIC) {
                     cellData = new CellData((BigDecimal) origData.value)
@@ -352,14 +369,7 @@ class FormListEasyExcelRender {
                 cellData.setData(origData)
                 return cellData
             }
-        }).build()
-
-        excelWriter.write(listData, sheet, writeTable)
-
-        // TODO? something special for footer row
-
-        // auto size columns
-//        for (int c = 0; c < sheetColCount; c++) sheet.autoSizeColumn(c)
+        }
     }
 
     Object getFieldValue(MNode fieldNode, MNode widgetNode) {
