@@ -47,7 +47,11 @@ dependencies {
     compile project(':framework')
 
     // EasyExcel - Apache 2.0 - https://github.com/alibaba/easyexcel
-    compile 'com.alibaba:easyexcel:2.2.6'
+    compile 'com.alibaba:easyexcel:2.2.7'
+
+    runtime group: 'org.apache.poi', name: 'poi', version: '4.1.2' // Apache 2.0
+    runtime group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2' // Apache 2.0
+    runtime group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.2' // Apache 2.0
 }
 
 // by default the Java plugin runs test on build, change to not do that (only run test if explicit task)
