@@ -22,15 +22,11 @@ import com.alibaba.excel.metadata.GlobalConfiguration
 import com.alibaba.excel.metadata.Head
 import com.alibaba.excel.metadata.property.ExcelContentProperty
 import com.alibaba.excel.write.handler.RowWriteHandler
-import com.alibaba.excel.write.handler.SheetWriteHandler
 import com.alibaba.excel.write.metadata.WriteSheet
 import com.alibaba.excel.write.metadata.WriteTable
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder
-import com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder
 import com.alibaba.excel.write.style.AbstractCellStyleStrategy
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.DateFormatConverter
@@ -332,7 +328,7 @@ class FormListEasyExcelRender {
     private WriteTable createWriteTable(List<String> headerTitleList, List<List<FormListData>> listData) {
         WriteTable writeTable = EasyExcel.writerTable(0).head(headerTitleList.collect({ [it] }))
                 .registerWriteHandler(new StyleStrategy(listData.size()))
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).registerConverter(newConverter()).build()
+                .registerWriteHandler(new ColumnWidthStyleStrategy()).registerConverter(newConverter()).build()
         return writeTable
     }
 
