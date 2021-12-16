@@ -1,12 +1,12 @@
 package org.moqui.poi;
 
 import com.alibaba.excel.enums.CellDataTypeEnum;
-import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.Head;
-import com.alibaba.excel.util.CollectionUtils;
+import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.style.column.AbstractColumnWidthStyleStrategy;
 import org.apache.poi.ss.usermodel.Cell;
+import org.moqui.util.CollectionUtilities;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -28,9 +28,9 @@ public class ColumnWidthStyleStrategy extends AbstractColumnWidthStyleStrategy {
     private Map<Integer, Map<Integer, Integer>> cache = new HashMap<Integer, Map<Integer, Integer>>(8);
 
     @Override
-    protected void setColumnWidth(WriteSheetHolder writeSheetHolder, List<CellData> cellDataList, Cell cell, Head head,
-        Integer relativeRowIndex, Boolean isHead) {
-        boolean needSetWidth = isHead || !CollectionUtils.isEmpty(cellDataList);
+    protected void setColumnWidth(WriteSheetHolder writeSheetHolder, List<WriteCellData<?>> cellDataList, Cell cell,
+                                  Head head, Integer relativeRowIndex, Boolean isHead) {
+        boolean needSetWidth = isHead || !(cellDataList == null || cellDataList.isEmpty());
         if (!needSetWidth) {
             return;
         }
@@ -53,11 +53,11 @@ public class ColumnWidthStyleStrategy extends AbstractColumnWidthStyleStrategy {
         }
     }
 
-    private Integer dataLength(List<CellData> cellDataList, Cell cell, Boolean isHead) {
+    private Integer dataLength(List<WriteCellData<?>> cellDataList, Cell cell, Boolean isHead) {
         if (isHead) {
             return cell.getStringCellValue().getBytes().length;
         }
-        CellData cellData = cellDataList.get(0);
+        WriteCellData<?> cellData = cellDataList.get(0);
         CellDataTypeEnum type = cellData.getType();
         if (type == null) {
             return -1;

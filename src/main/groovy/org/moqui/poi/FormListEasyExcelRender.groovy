@@ -17,15 +17,18 @@ import com.alibaba.excel.EasyExcel
 import com.alibaba.excel.ExcelWriter
 import com.alibaba.excel.converters.Converter
 import com.alibaba.excel.enums.CellDataTypeEnum
-import com.alibaba.excel.metadata.CellData
 import com.alibaba.excel.metadata.GlobalConfiguration
 import com.alibaba.excel.metadata.Head
+import com.alibaba.excel.metadata.data.ReadCellData
+import com.alibaba.excel.metadata.data.WriteCellData
 import com.alibaba.excel.metadata.property.ExcelContentProperty
 import com.alibaba.excel.write.handler.RowWriteHandler
+import com.alibaba.excel.write.handler.WorkbookWriteHandler
 import com.alibaba.excel.write.metadata.WriteSheet
 import com.alibaba.excel.write.metadata.WriteTable
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder
+import com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder
 import com.alibaba.excel.write.style.AbstractCellStyleStrategy
 import groovy.transform.CompileStatic
 import org.apache.poi.ss.usermodel.*
@@ -102,7 +105,7 @@ class FormListEasyExcelRender {
     }
 
     @CompileStatic
-    class StyleStrategy extends AbstractCellStyleStrategy implements RowWriteHandler {
+    class StyleStrategy extends AbstractCellStyleStrategy implements RowWriteHandler, WorkbookWriteHandler {
 
         EnumMap<StyleKey, CellStyle> styleMap
         CellStyle headerStyle
@@ -113,6 +116,10 @@ class FormListEasyExcelRender {
         }
 
         @Override
+        void afterWorkbookCreate(WriteWorkbookHolder writeWorkbookHolder) {
+            initCellStyle(writeWorkbookHolder.getWorkbook())
+        }
+
         protected void initCellStyle(Workbook workbook) {
             this.headerStyle = makeHeaderStyle(workbook)
             CellStyle rowDefaultStyle = makeRowDefaultStyle(workbook)
@@ -137,12 +144,12 @@ class FormListEasyExcelRender {
         }
 
         @Override
-        void afterCellDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, List<CellData> cellDataList, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
+        void afterCellDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, List<WriteCellData<?>> cellDataList, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
             if (isHead) {
                 cell.setCellStyle(headerStyle)
             } else {
                 if (cellDataList.isEmpty() == false) {
-                    CellData data = cellDataList.first()
+                    WriteCellData<?> data = cellDataList.first()
                     if (data.type != CellDataTypeEnum.EMPTY) {
                         cell.setCellStyle(styleMap.get(((FormListData)data.getData()).style))
                     }
@@ -356,20 +363,20 @@ class FormListEasyExcelRender {
             }
 
             @Override
-            Object convertToJavaData(CellData cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
+            Object convertToJavaData(ReadCellData cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
                 return null
             }
 
             @Override
-            CellData convertToExcelData(Object value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
+            WriteCellData<?> convertToExcelData(Object value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
                 FormListData origData = value as FormListData
-                CellData cellData
+                WriteCellData<?> cellData
                 if (origData == null) {
-                    cellData = CellData.newEmptyInstance()
+                    cellData = WriteCellData.newInstance()
                 } else if (origData.type == CellType.STRING) {
-                    cellData = new CellData((String) origData.value)
+                    cellData = new WriteCellData<?>((String) origData.value)
                 } else if (origData.type == CellType.NUMERIC) {
-                    cellData = new CellData((BigDecimal) origData.value)
+                    cellData = new WriteCellData<?>((BigDecimal) origData.value)
                 } else {
                     throw new RuntimeException("unsupported cell type")
                 }
