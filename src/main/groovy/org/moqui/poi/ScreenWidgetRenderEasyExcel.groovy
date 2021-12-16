@@ -17,6 +17,7 @@ import com.alibaba.excel.EasyExcel
 import com.alibaba.excel.ExcelWriter
 import com.alibaba.excel.write.metadata.WriteSheet
 import groovy.transform.CompileStatic
+import org.apache.logging.log4j.Level
 import org.moqui.impl.context.ExecutionContextImpl
 import org.moqui.impl.screen.*
 import org.moqui.util.ContextStack
@@ -40,7 +41,9 @@ import org.slf4j.LoggerFactory
 class ScreenWidgetRenderEasyExcel implements ScreenWidgetRender {
     private static final Logger logger = LoggerFactory.getLogger(ScreenWidgetRenderEasyExcel.class)
     private static final String excelWriterFieldName = "WidgetRenderEasyExcelWriter"
-
+    static {
+        org.apache.logging.log4j.core.config.Configurator.setLevel("org.apache.poi.util.XMLHelper", Level.ERROR);
+    }
     ScreenWidgetRenderEasyExcel() { }
 
     @Override
