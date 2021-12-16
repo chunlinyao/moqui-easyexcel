@@ -235,7 +235,7 @@ class FormListEasyExcelRender {
                         // String fieldName = fieldNode.attribute("name")
                         String fieldAlign = fieldNode.attribute("align")
 
-                        MNode defaultField = fieldNode.first("default-field")
+                        MNode defaultField = getDataField(fieldNode)
                         ArrayList<MNode> childList = defaultField.getChildren()
                         int childListSize = childList.size()
 
@@ -323,6 +323,17 @@ class FormListEasyExcelRender {
 
         // auto size columns
 //        for (int c = 0; c < sheetColCount; c++) sheet.autoSizeColumn(c)
+    }
+
+    private MNode getDataField(MNode fieldNode) {
+        List<MNode> conditionalFields = fieldNode.children("conditional-field")
+        for(MNode node : conditionalFields) {
+            if (eci.resource.condition(node.attribute("condition"), "")) {
+                return node
+            }
+        }
+        MNode defaultField = fieldNode.first("default-field")
+        return defaultField
     }
 
     private WriteTable createWriteTable(List<String> headerTitleList, List<List<FormListData>> listData) {
