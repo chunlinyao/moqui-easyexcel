@@ -24,6 +24,7 @@ import com.alibaba.excel.metadata.data.WriteCellData
 import com.alibaba.excel.metadata.property.ExcelContentProperty
 import com.alibaba.excel.write.handler.RowWriteHandler
 import com.alibaba.excel.write.handler.WorkbookWriteHandler
+import com.alibaba.excel.write.handler.context.CellWriteHandlerContext
 import com.alibaba.excel.write.metadata.WriteSheet
 import com.alibaba.excel.write.metadata.WriteTable
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder
@@ -144,37 +145,19 @@ class FormListEasyExcelRender {
         }
 
         @Override
-        void afterCellDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, List<WriteCellData<?>> cellDataList, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
-            if (isHead) {
-                cell.setCellStyle(headerStyle)
-            } else {
-                if (cellDataList.isEmpty() == false) {
-                    WriteCellData<?> data = cellDataList.first()
-                    if (data.type != CellDataTypeEnum.EMPTY) {
-                        cell.setCellStyle(styleMap.get(((FormListData)data.getData()).style))
-                    }
+        protected void setHeadCellStyle(Cell cell, Head head, Integer relativeRowIndex) {
+            cell.setCellStyle(headerStyle)
+        }
+
+        @Override
+        protected void setContentCellStyle(CellWriteHandlerContext context) {
+            def cellDataList = context.getCellDataList();
+            if (cellDataList.isEmpty() == false) {
+                WriteCellData<?> data = cellDataList.first()
+                if (data.type != CellDataTypeEnum.EMPTY) {
+                    context.getCell().setCellStyle(styleMap.get(((FormListData)data.getData()).style))
                 }
             }
-        }
-
-        @Override
-        protected void setHeadCellStyle(Cell cell, Head head, Integer relativeRowIndex) {
-            //NOOP
-        }
-
-        @Override
-        protected void setContentCellStyle(Cell cell, Head head, Integer relativeRowIndex) {
-            //NOOP
-        }
-
-        @Override
-        void beforeRowCreate(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Integer rowIndex, Integer relativeRowIndex, Boolean isHead) {
-
-        }
-
-        @Override
-        void afterRowCreate(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Row row, Integer relativeRowIndex, Boolean isHead) {
-
         }
 
         @Override
