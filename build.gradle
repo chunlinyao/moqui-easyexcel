@@ -50,7 +50,7 @@ dependencies {
     implementation project(':framework')
 
     // EasyExcel - Apache 2.0 - https://github.com/alibaba/easyexcel
-    implementation('com.alibaba:easyexcel:3.0.5') {
+    implementation('com.alibaba:easyexcel:3.2.0') {
         exclude group: 'org.apache.poi'
     }
 
@@ -58,8 +58,8 @@ dependencies {
 //    runtime group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2' // Apache 2.0
 //    runtime group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.2' // Apache 2.0
 
-    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.2' // Apache 2.0
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2' // Apache 2.0
+    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3' // Apache 2.0
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3' // Apache 2.0
 //    compile group: 'org.apache.poi', name: 'poi-ooxml-full', version: '5.2.2' // Apache 2.0
 }
 
