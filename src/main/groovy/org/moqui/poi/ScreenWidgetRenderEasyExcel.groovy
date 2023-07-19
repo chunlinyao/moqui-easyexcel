@@ -42,7 +42,7 @@ class ScreenWidgetRenderEasyExcel implements ScreenWidgetRender {
     private static final Logger logger = LoggerFactory.getLogger(ScreenWidgetRenderEasyExcel.class)
     private static final String excelWriterFieldName = "WidgetRenderEasyExcelWriter"
     static {
-        org.apache.logging.log4j.core.config.Configurator.setLevel("org.apache.poi.util.XMLHelper", Level.ERROR);
+        // org.apache.logging.log4j.core.config.Configurator.setLevel("org.apache.poi.util.XMLHelper", Level.ERROR);
     }
     ScreenWidgetRenderEasyExcel() { }
 

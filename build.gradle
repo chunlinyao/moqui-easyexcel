@@ -14,8 +14,8 @@
 
 apply plugin: 'groovy'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 def componentNode = parseComponent(project)
 version = componentNode.'@version'
@@ -26,8 +26,11 @@ def frameworkDir = file(moquiDir.absolutePath + '/framework')
 // to run use "gradle dependencyUpdates"
 apply plugin: 'com.github.ben-manes.versions'
 buildscript {
-  repositories { jcenter() }
-  dependencies { classpath 'com.github.ben-manes:gradle-versions-plugin:0.27.0' }
+  repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+  dependencies { classpath 'com.github.ben-manes:gradle-versions-plugin:0.42.0' }
 }
 dependencyUpdates.resolutionStrategy = { componentSelection { rules -> rules.all { ComponentSelection selection ->
     boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier -> selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/ }
@@ -36,7 +39,7 @@ dependencyUpdates.resolutionStrategy = { componentSelection { rules -> rules.all
 
 repositories {
     flatDir name: 'localLib', dirs: frameworkDir.absolutePath + '/lib'
-    jcenter()
+    mavenCentral()
 }
 
 // Log4J has annotation processors, disable to avoid warning
@@ -44,10 +47,10 @@ tasks.withType(JavaCompile) { options.compilerArgs << "-proc:none" }
 tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
 
 dependencies {
-    compile project(':framework')
+    implementation project(':framework')
 
     // EasyExcel - Apache 2.0 - https://github.com/alibaba/easyexcel
-    compile('com.alibaba:easyexcel:3.0.5') {
+    implementation('com.alibaba:easyexcel:3.2.0') {
         exclude group: 'org.apache.poi'
     }
 
@@ -55,9 +58,9 @@ dependencies {
 //    runtime group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2' // Apache 2.0
 //    runtime group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.2' // Apache 2.0
 
-    compile group: 'org.apache.poi', name: 'poi', version: '5.2.3' // Apache 2.0
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3' // Apache 2.0
-//    compile group: 'org.apache.poi', name: 'poi-ooxml-full', version: '5.1.0' // Apache 2.0
+    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3' // Apache 2.0
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3' // Apache 2.0
+//    compile group: 'org.apache.poi', name: 'poi-ooxml-full', version: '5.2.2' // Apache 2.0
 }
 
 // by default the Java plugin runs test on build, change to not do that (only run test if explicit task)
@@ -72,7 +75,7 @@ jar {
     archiveBaseName = jarBaseName
 }
 task copyDependencies { doLast {
-    copy { from (configurations.runtime - project(':framework').configurations.runtime - project(':framework').jar.archivePath)
+    copy { from (configurations.runtimeClasspath - project(':framework').configurations.runtimeClasspath - project(':framework').jar.archivePath)
         into file(projectDir.absolutePath + '/lib') }
 } }
 copyDependencies.dependsOn cleanLib
